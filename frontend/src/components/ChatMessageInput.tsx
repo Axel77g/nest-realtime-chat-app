@@ -1,31 +1,32 @@
-import React from 'react';
-import {
-  Smile,
-  Paperclip,
-  Image as ImageIcon,
-  Send
-} from 'lucide-react';
+import React from "react";
+import { Smile, Paperclip, Image as ImageIcon, Send } from "lucide-react";
+import { NotImplemented } from "./ui/NotImplemented.tsx";
 
 interface MessageInputProps {
   value: string;
   setValue: (value: string) => void;
   onSend: () => void;
-  onInput: React.FormEventHandler<HTMLInputElement> ;
+  onInput: React.FormEventHandler<HTMLInputElement>;
 }
 
-const MessageInput: React.FC<MessageInputProps> = ({ value, setValue, onSend, onInput }) => {
-    function handleInput(e: React.KeyboardEvent<HTMLInputElement>) {
-        if (e.key !== 'Enter') {
-            onInput(e);
-        }
+const MessageInput: React.FC<MessageInputProps> = ({
+  value,
+  setValue,
+  onSend,
+  onInput,
+}) => {
+  function handleInput(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key !== "Enter") {
+      onInput(e);
     }
+  }
 
-    function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
-        if (e.key === 'Enter') {
-            onSend();
-        }
+  function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === "Enter") {
+      onSend();
     }
-    return (
+  }
+  return (
     <div className="flex items-center px-4 py-3 bg-white border-t border-primary-light/10">
       {/* Input field */}
       <div className="flex-1 flex items-center bg-[#eef1f9] rounded-lg px-4 py-2">
@@ -42,15 +43,31 @@ const MessageInput: React.FC<MessageInputProps> = ({ value, setValue, onSend, on
 
       {/* Icons */}
       <div className="flex items-center space-x-4 px-4">
-        <button className="text-primary hover:text-primary/70 transition" type="button">
-          <Smile size={18} />
-        </button>
-        <button className="text-primary hover:text-primary/70 transition" type="button">
-          <Paperclip size={18} />
-        </button>
-        <button className="text-primary hover:text-primary/70 transition" type="button">
-          <ImageIcon size={18} />
-        </button>
+        <NotImplemented>
+          <button
+            className="text-primary hover:text-primary/70 transition"
+            type="button"
+          >
+            <Smile size={18} />
+          </button>
+        </NotImplemented>
+
+        <NotImplemented>
+          <button
+            className="text-primary hover:text-primary/70 transition"
+            type="button"
+          >
+            <Paperclip size={18} />
+          </button>
+        </NotImplemented>
+        <NotImplemented>
+          <button
+            className="text-primary hover:text-primary/70 transition"
+            type="button"
+          >
+            <ImageIcon size={18} />
+          </button>
+        </NotImplemented>
       </div>
 
       {/* Send */}

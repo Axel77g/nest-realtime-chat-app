@@ -49,8 +49,12 @@ export class ConversationController {
     @Body() body: OpenConversationDto,
     @Req() request: { user: User },
   ) {
-    body.participantsPseudos.unshift(request.user.pseudo); // add the user to the participants at the beginning (admin user)
-    return await this.conversationService.openConversation(body);
+    const response = await this.conversationService.openConversation(
+      body,
+      request.user,
+    );
+    if (response instanceof Error) throw response;
+    return response;
   }
 
   @Delete(':identifier')

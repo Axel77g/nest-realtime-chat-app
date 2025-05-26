@@ -17,6 +17,8 @@ export class MongoUserRepository implements UserRepository {
     return {
       pseudo: document.pseudo,
       password: document.password,
+      color: document.color,
+      avatarURL: document.avatarURL || null,
     };
   }
 
@@ -24,13 +26,15 @@ export class MongoUserRepository implements UserRepository {
     const document = await this.userModel
       .findOneAndUpdate(
         { pseudo: user.pseudo },
-        { password: user.password },
+        { password: user.password, color: user.color },
         { upsert: true, new: true },
       )
       .exec();
     return {
       pseudo: document.pseudo,
       password: document.password,
+      color: document.color,
+      avatarURL: document.avatarURL || null,
     };
   }
 

@@ -37,6 +37,8 @@ export class AuthService {
     return {
       user: {
         pseudo: user.pseudo,
+        color: user.color,
+        avatarURL: user.avatarURL,
       },
       access_token: this.jwtService.sign(payload, {
         secret: process.env.JWT_SECRET,
@@ -61,10 +63,16 @@ export class AuthService {
     }
   }
 
-  public async register(user: {
+  public async register(authPayload: {
     pseudo: string;
     password: string;
   }): Promise<User | Error> {
+    const color = '#7269ef';
+    const user = {
+      ...authPayload,
+      color,
+      avatarURL: null,
+    };
     user.password = await bcrypt.hash(user.password, 10);
     const userCreated = await this.userService.create(user);
     if (userCreated instanceof Error) return user;

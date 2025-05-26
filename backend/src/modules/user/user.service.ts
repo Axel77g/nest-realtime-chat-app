@@ -18,9 +18,22 @@ export class UserService {
   async create(user: {
     pseudo: string;
     password: string;
+    color: string;
+    avatarURL: string | null;
   }): Promise<User | Error> {
     const existingUser = await this.userRepository.findByPseudo(user.pseudo);
     if (existingUser) return new Error('Username already taken');
     return this.userRepository.create(user);
+  }
+
+  async update(user: {
+    pseudo: string;
+    password?: string;
+    color?: string;
+    avatarURL?: string | null;
+  }): Promise<User | Error> {
+    const existingUser = await this.userRepository.findByPseudo(user.pseudo);
+    if (!existingUser) return new Error('User not found');
+    return this.userRepository.update({ ...existingUser, ...user });
   }
 }

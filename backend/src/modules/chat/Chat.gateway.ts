@@ -1,5 +1,4 @@
 import {
-  ConnectedSocket,
   MessageBody,
   SubscribeMessage,
   WebSocketGateway,
@@ -8,7 +7,6 @@ import {
 import { Server, Socket } from 'socket.io';
 import { AuthService } from '../auth/auth.service';
 import { Conversation } from '../../domain/entities/conversation.entity';
-import { User } from '../../domain/entities/user.entity';
 
 export enum ChatEvent {
   READ_UPDATE = 'readUpdate',
@@ -68,9 +66,9 @@ export class ChatGateway {
     event: ChatEvent = ChatEvent.NEW_UPDATE_MESSAGE,
     data?: any,
   ) {
-    for (const room of conversation.participants) {
-      if (room === excludedUser?.pseudo) continue;
-      this.server.to(room).emit(event, {
+    for (const user of conversation.participants) {
+      if (user.pseudo === excludedUser?.pseudo) continue;
+      this.server.to(user.pseudo).emit(event, {
         conversation: conversation,
         data: data,
       });

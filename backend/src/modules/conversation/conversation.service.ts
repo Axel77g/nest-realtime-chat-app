@@ -80,7 +80,11 @@ export class ConversationService {
     conversation: Conversation,
     participantPseudo: string,
   ): Promise<Error | boolean> {
-    if (!conversation.participants.includes(participantPseudo))
+    if (
+      !conversation.participants.some(
+        (participant) => participant.pseudo == participantPseudo,
+      )
+    )
       return new Error('User not in conversation');
     return true;
   }
@@ -100,9 +104,11 @@ export class ConversationService {
    * Open a new conversation with the given participants the array is already checked
    * to contain more than 1 participant and not duplicate participants
    */
-  async openConversation({
-    participantsPseudos,
-  }: OpenConversationDto): Promise<Conversation | Error> {
+  async openConversation(
+    { participantsPseudos }: OpenConversationDto,
+    connectedUser: User,
+  ): Promise<Conversation | Error> {
+    participantsPseudos.unshift(connectedUser.pseudo); // add the user to the participants at the beginning (admin user)
     for (const pseudo of participantsPseudos) {
       const user = await this.userService.findByPseudo(pseudo);
       if (!user)
@@ -111,23 +117,45 @@ export class ConversationService {
         );
     }
 
-    const nameArray = [...participantsPseudos];
+    const uniqueParticipantsPseudos = [...new Set(participantsPseudos)];
+    if (uniqueParticipantsPseudos.length == 1)
+      //case when the user select himself
+      return new BadRequestException(
+        'Cannot create a conversation with one user',
+      );
+
+    const existingConversation =
+      await this.conversationRepository.getConversationByParticipants(
+        uniqueParticipantsPseudos,
+      );
+    if (existingConversation) {
+      return new BadRequestException(
+        'The conversation already exist and is opened',
+      );
+    }
+
+    const nameArray = [...uniqueParticipantsPseudos];
     nameArray.shift();
 
     const conversation = {
       identifier: crypto.randomUUID(),
-      participants: participantsPseudos,
+      participants: uniqueParticipantsPseudos,
       name: nameArray.join(', '),
       lastMessageDate: new Date(),
       closed: false,
     };
-    const reponse =
+
+    const response =
       await this.conversationRepository.putConversation(conversation);
-    if (!reponse)
+    if (!response)
       return new InternalServerErrorException(
         'Error while opening conversation',
       );
-    return conversation;
+    const conversationResponse = await this.getConversationByIdentifier(
+      conversation.identifier,
+    );
+    if (conversationResponse instanceof Error) return conversationResponse;
+    return conversationResponse;
   }
 
   async closeConversation(
@@ -139,7 +167,7 @@ export class ConversationService {
         conversationIdentifier,
       );
     if (conversation instanceof Error) return conversation;
-    if (conversation.participants[0] !== intentedClosingParticipant)
+    if (conversation.participants[0].pseudo !== intentedClosingParticipant)
       return new UnauthorizedException(
         'You are not the admin of this conversation',
       );
@@ -180,21 +208,23 @@ export class ConversationService {
     participantPseudo: string,
     action: ConversationAction,
   ): Promise<Conversation | Error> {
+    const user = await this.userService.findByPseudo(participantPseudo);
+
     if (action === ConversationAction.JOIN) {
-      if (conversation.participants.includes(participantPseudo))
+      if (conversation.participants.some((u) => u.pseudo == participantPseudo))
         return new BadRequestException('User already in conversation');
-      conversation.participants.push(participantPseudo);
+      conversation.participants.push(user);
     } else if (action === ConversationAction.LEAVE) {
-      if (!conversation.participants.includes(participantPseudo))
+      if (!conversation.participants.some((u) => u.pseudo == participantPseudo))
         return new BadRequestException('User not in conversation');
       conversation.participants = conversation.participants.filter(
-        (p) => p !== participantPseudo,
+        (u) => u.pseudo !== participantPseudo,
       );
     }
 
-    const reponse =
+    const response =
       await this.conversationRepository.putConversation(conversation);
-    if (!reponse)
+    if (!response)
       return new InternalServerErrorException(
         `Error while ${action.toLowerCase()}ing conversation`,
       );

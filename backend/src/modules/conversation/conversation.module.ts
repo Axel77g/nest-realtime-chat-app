@@ -8,6 +8,7 @@ import { ConversationInterceptor } from './conversation.interceptor';
 import { AuthModule } from '../auth/auth.module';
 import { MessageSchema } from '../../infrastructure/mongo/message.schema';
 import { ConversationRepositoryProvider } from '../../domain/repositories/conversation.repository';
+import { UserSchema } from '../../infrastructure/mongo/user.schema';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { ConversationRepositoryProvider } from '../../domain/repositories/conver
       { name: 'Conversation', schema: ConversationSchema },
     ]),
     MongooseModule.forFeature([{ name: 'Message', schema: MessageSchema }]),
+    MongooseModule.forFeature([{ name: 'User', schema: UserSchema }]),
     UserModule,
     AuthModule,
   ],

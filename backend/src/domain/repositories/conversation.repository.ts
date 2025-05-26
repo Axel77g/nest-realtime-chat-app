@@ -1,21 +1,31 @@
 import { MongoConversationRepository } from 'src/infrastructure/mongo/conversation.repository';
-import { Conversation } from '../entities/conversation.entity';
+import {
+  Conversation,
+  ConversationIdentifiable,
+  ConversationPseudoOnly,
+} from '../entities/conversation.entity';
 import { Message } from '../entities/message.entity';
 
 export interface ConversationRepository {
   getParticipantConversations(
     participantPseudo: string,
   ): Promise<Conversation[]>;
-  putConversation(conversation: Conversation): Promise<boolean>;
+  putConversation(
+    conversation: ConversationPseudoOnly | Conversation,
+  ): Promise<boolean>;
   getConversationByIdentifier(identifier: string): Promise<Conversation | null>;
   countUnreadMessages(
-    conversation: Conversation,
+    conversation: ConversationIdentifiable,
     participantPseudo: string,
   ): Promise<number>;
-  getLastMessage(conversation: Conversation): Promise<Message | null>;
-
+  getLastMessage(
+    conversation: ConversationIdentifiable,
+  ): Promise<Message | null>;
+  getConversationByParticipants(
+    participants: string[],
+  ): Promise<Conversation | null>;
   markAsRead(
-    conversation: Conversation,
+    conversation: ConversationIdentifiable,
     participantPseudo: string,
   ): Promise<boolean>;
 }
