@@ -135,7 +135,6 @@ export class ConversationService {
     }
 
     const nameArray = [...uniqueParticipantsPseudos];
-    nameArray.shift();
 
     const conversation = {
       identifier: crypto.randomUUID(),

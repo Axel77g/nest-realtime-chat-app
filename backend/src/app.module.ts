@@ -8,12 +8,15 @@ import { ConversationModule } from './modules/conversation/conversation.module';
 import { MessageModule } from './modules/message/message.module';
 import { ChatModule } from './modules/chat/chat.module';
 import { FileModule } from './modules/file/file.module';
+import * as process from 'node:process';
 
 @Module({
   imports: [
     AuthModule,
     UserModule,
-    MongooseModule.forRoot('mongodb://mongodb:27017/nest'),
+    MongooseModule.forRoot(
+      process.env.MONGO_URI || 'mongodb://mongodb:27017/nest',
+    ),
     ConversationModule,
     MessageModule,
     ChatModule,

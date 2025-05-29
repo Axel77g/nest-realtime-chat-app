@@ -4,6 +4,11 @@ import * as bcrypt from 'bcrypt';
 import { UserService } from 'src/modules/user/user.service';
 import { User } from '../../domain/entities/user.entity';
 
+export interface UserWithAccessToken {
+  access_token: string;
+  user: Omit<User, 'password'>;
+}
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -14,7 +19,7 @@ export class AuthService {
   async authenticate(
     pseudo: string,
     plainPassword: string,
-  ): Promise<{ access_token: string } | Error> {
+  ): Promise<UserWithAccessToken | Error> {
     const user = await this.validateUser(pseudo, plainPassword);
     if (user instanceof Error) return user;
     return this.generateJWT(user);
@@ -30,9 +35,7 @@ export class AuthService {
     return new Error('Invalid credentials');
   }
 
-  private async generateJWT(
-    user: User,
-  ): Promise<{ user: Omit<User, 'password'>; access_token: string }> {
+  private async generateJWT(user: User): Promise<UserWithAccessToken> {
     const payload = { pseudo: user.pseudo };
     return {
       user: {
@@ -66,7 +69,7 @@ export class AuthService {
   public async register(authPayload: {
     pseudo: string;
     password: string;
-  }): Promise<User | Error> {
+  }): Promise<UserWithAccessToken | Error> {
     const color = '#7269ef';
     const user = {
       ...authPayload,
@@ -75,7 +78,7 @@ export class AuthService {
     };
     user.password = await bcrypt.hash(user.password, 10);
     const userCreated = await this.userService.create(user);
-    if (userCreated instanceof Error) return user;
-    return user;
+    if (userCreated instanceof Error) return userCreated;
+    return this.generateJWT(user);
   }
 }
