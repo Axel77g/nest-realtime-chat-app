@@ -21,6 +21,10 @@ interface AuthContextType {
   setUser(user: User | null): void;
   fetchMe: () => Promise<void>;
   login: (credentials: { pseudo: string; password: string }) => Promise<void>;
+  register: (credentials: {
+    pseudo: string;
+    password: string;
+  }) => Promise<void>;
   logout: () => void;
   wsConnection: Socket | null;
 }
@@ -51,19 +55,34 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const login = async (credentials: { pseudo: string; password: string }) => {
+  const makeCall = async (
+    credentials: { pseudo: string; password: string },
+    action: string = "login",
+  ) => {
     const client = getAxiosInstance();
     try {
-      const response = await client.post("/auth/login", credentials);
+      const response = await client.post(`/auth/${action}`, credentials);
       const token = response.data.access_token;
       localStorage.setItem("token", token);
       setUser({ ...response.data.user });
     } catch (e) {
       console.error(e);
       setUser(null);
+      throw e;
     } finally {
       setupWS();
     }
+  };
+
+  const login = async (credentials: { pseudo: string; password: string }) => {
+    return makeCall(credentials, "login");
+  };
+
+  const register = async (credentials: {
+    pseudo: string;
+    password: string;
+  }) => {
+    return makeCall(credentials, "register");
   };
 
   const logout = () => {
@@ -105,6 +124,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         logout,
         fetchMe,
         setUser,
+        register,
         wsConnection: wsConnection.current,
       }}
     >

@@ -10,6 +10,7 @@ interface ChatMessageProps {
   participant: Participant;
   isSender?: boolean;
   isTyping?: boolean;
+  readBy?: Participant[];
 }
 
 const ChatMessage: React.FC<ChatMessageProps> = ({
@@ -18,6 +19,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
   participant,
   isSender = false,
   isTyping = false,
+  readBy,
 }) => {
   return (
     <div
@@ -59,6 +61,14 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
         <p className="text-sm text-gray-700 mt-2 font-medium">
           {participant.pseudo}
         </p>
+        {/* Read by */}
+        {readBy && readBy.length > 0 && (
+          <div className="text-xs text-gray-500 mt-1">
+            {readBy.length === 1
+              ? `${readBy[0].pseudo} read this message`
+              : `${readBy.length} people read this message`}
+          </div>
+        )}
       </div>
 
       {/* Sender avatar */}

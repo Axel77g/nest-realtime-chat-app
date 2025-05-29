@@ -29,7 +29,7 @@
 
 ### Gestion des Utilisateurs
 - Recherche d'utilisateurs par pseudo
-- Profils utilisateurs
+- Profils utilisateurs (page /profile accesible en bas à gauche)
 
 ### Messagerie
 - Création de conversations (2 à 10 participants)
@@ -56,10 +56,13 @@
 ```bash
  cp .env.example .env
 ```
+
+> NODE_ENV doit être `development` pour le développement local ou `production` pour la production. (cf backend/Dockerfile et ./docker-compose.yml)
+
 2. Lancement avec Docker Compose (backend)
 > Pas nécessaire de faire de `npm install` (cf `backend/Dockerfile`)
 ```bash
-docker-compose up -d
+docker-compose up -d --build
 ```
 3. Installation des dépendances Frontend (dans le dossier frontend)
 

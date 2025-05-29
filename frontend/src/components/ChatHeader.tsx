@@ -1,8 +1,8 @@
 import React from "react";
 import { Search, Phone, Video, User, MoreHorizontal } from "lucide-react";
 import { NotImplemented } from "./ui/NotImplemented.tsx";
-import Avatar from "./ui/Avatar.tsx";
 import { Participant } from "../hooks/useConversations.ts";
+import ParticipantsConversation from "./ui/ParticipantsConversation.tsx";
 
 interface ChatHeaderProps {
   participants: Participant[];
@@ -15,7 +15,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({ participants, name }) => {
     <div className="flex items-center justify-between px-4 py-3 border-b border-primary-light/10 bg-white">
       {/* Avatar + Name + Status */}
       <div className="flex items-center space-x-3">
-        {participants.length && <Avatar user={participants[0]} />}
+        <ParticipantsConversation participants={participants} />
 
         <span className="font-semibold text-gray-800">{name}</span>
       </div>

@@ -4,10 +4,12 @@ import { useChatContext } from "../contexts/ChatContext.tsx";
 import { CreateConversationDialog } from "./CreateConversationDialog.tsx";
 import { createDialogContext } from "./ui/Dialog.tsx";
 import { ProfileBottomStatusBar } from "./ProfileBottomStatusBar.tsx";
+import { useAuth } from "../contexts/AuthContext.tsx";
 
 const ConversationAsideList = () => {
   const { setSelectedConversation, conversations, searchString, search } =
     useChatContext();
+  const { user } = useAuth();
 
   const createConversationDialogContext = createDialogContext(false);
 
@@ -38,13 +40,17 @@ const ConversationAsideList = () => {
         {/* Recent Chats */}
         <h3 className="text-md font-medium text-primary-light mb-2">Recent</h3>
         <div className="space-y-1 ">
+          {conversations.length === 0 && (
+            <div className="text-gray-500 text-sm text-center py-4">
+              No conversations found.
+            </div>
+          )}
           {conversations.map((conv) => (
             <div
               key={conv.identifier}
               className={conv.selected ? "rounded-lg" : ""}
             >
               <ConversationItem
-                title={conv.name}
                 message={
                   conv.isTyping ? (
                     <span className="text-primary">
@@ -55,7 +61,9 @@ const ConversationAsideList = () => {
                   )
                 }
                 time={conv.lastMessageDate?.toLocaleTimeString() || ""}
-                participants={[...(conv?.participants ?? [])].splice(1)}
+                participants={
+                  conv?.getParticipantsWithoutUser(user?.pseudo || "") || []
+                }
                 online={conv.online}
                 selected={conv.selected}
                 onClick={() => setSelectedConversation(conv)}

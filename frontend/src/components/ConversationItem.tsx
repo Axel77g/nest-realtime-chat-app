@@ -1,10 +1,9 @@
 import React, { JSX } from "react";
 import clsx from "clsx";
 import { Participant } from "../hooks/useConversations.ts";
-import Avatar from "./ui/Avatar.tsx";
+import ParticipantsConversation from "./ui/ParticipantsConversation.tsx";
 
 interface ConversationItemProps {
-  title: string;
   participants: Participant[];
   message: string | JSX.Element;
   time: string;
@@ -15,7 +14,6 @@ interface ConversationItemProps {
 }
 
 const ConversationItem: React.FC<ConversationItemProps> = ({
-  title,
   participants,
   message,
   time,
@@ -24,6 +22,9 @@ const ConversationItem: React.FC<ConversationItemProps> = ({
   onClick,
 }) => {
   const hasUnread: boolean = unreadCount > 0;
+  const title = participants
+    .map((participant) => participant.pseudo)
+    .join(", ");
   return (
     <div
       onClick={onClick}
@@ -33,7 +34,7 @@ const ConversationItem: React.FC<ConversationItemProps> = ({
       )}
     >
       {/* Avatar with status */}
-      <Avatar user={participants[0]} />
+      <ParticipantsConversation participants={participants} />
 
       {/* Text content */}
       <div className="flex-1">

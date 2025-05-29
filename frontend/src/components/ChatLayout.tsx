@@ -31,7 +31,7 @@ const ChatLayout: React.FC<ChatLayoutProps> = ({
     });
   };
 
-  const stopTypingDebounce = useRef<number | null>(null);
+  const stopTypingDebounce = useRef<any | null>(null);
   const typing = useRef(false);
 
   const startStopTypingEvent = useWebsocketEvents("typingUpdate");
@@ -89,10 +89,29 @@ const ChatLayout: React.FC<ChatLayoutProps> = ({
     );
   }
 
+  function getReadByParticipants(message: Message): Participant[] {
+    if (!conversation) return [];
+    return conversation.participants.filter((p) =>
+      message.readBy
+        .filter((pseudo) => pseudo != message.author && user?.pseudo != pseudo) //not the author and not the user
+        .includes(p.pseudo),
+    );
+  }
+
+  let title;
+  if (!conversation) {
+    title = null;
+  } else {
+    title = conversation
+      .getParticipantsWithoutUser(user?.pseudo || "")
+      ?.map((p) => p.pseudo)
+      .join(", ");
+  }
+
   return (
     <div className="flex flex-col h-screen bg-gray-50 flex-1">
       <ChatHeader
-        name={conversation?.name || "chat"}
+        name={title || "chat"}
         participants={[...(conversation?.participants ?? [])].splice(1)}
       />
 
@@ -121,6 +140,7 @@ const ChatLayout: React.FC<ChatLayoutProps> = ({
                 participant={getAuthorParticipant(el)}
                 isSender={el.isSender}
                 isTyping={false}
+                readBy={getReadByParticipants(el)}
               />
             );
           }

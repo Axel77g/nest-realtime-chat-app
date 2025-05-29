@@ -6,12 +6,14 @@ import PrivateRoute from "./PrivateRoute.tsx";
 import { AuthProvider } from "./contexts/AuthContext.tsx";
 import ChatContextProvider from "./contexts/ChatContext.tsx";
 import { ProfilePage } from "./pages/ProfilePage.tsx";
+import RegisterPage from "./pages/RegisterPage.tsx";
 
 function App() {
   return (
     <AuthProvider>
       <Routes>
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
         <Route element={<PrivateRoute />}>
           <Route
             path={"/"}

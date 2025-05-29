@@ -18,6 +18,7 @@ export interface Conversation {
   unreadCount: number;
   isTyping: boolean;
   selected: boolean;
+  getParticipantsWithoutUser: (userPseudo: string) => Participant[] | undefined;
 }
 
 export function useConversations() {
@@ -40,6 +41,13 @@ export function useConversations() {
           online: true,
           unreadCount: conversation.unreadCount,
           isTyping: false,
+          getParticipantsWithoutUser(
+            userPseudo: string,
+          ): Participant[] | undefined {
+            return this.participants.filter(
+              (participant: Participant) => participant.pseudo !== userPseudo,
+            );
+          },
         };
       }),
     );
