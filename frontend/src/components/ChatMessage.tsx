@@ -40,20 +40,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
           )}
         >
           <div className="flex items-center justify-between space-x-3">
-            <p className="text-base">
-              {isTyping ? (
-                <>
-                  typing{" "}
-                  <span className="">
-                    <span className="animate-ping inline-block w-[3px] h-[3px] mx-[3px] rounded-full bg-primary-light/50"></span>
-                    <span className="animate-ping inline-block w-[3px] h-[3px] mx-[3px] rounded-full bg-primary-light/50"></span>
-                    <span className="animate-ping inline-block w-[3px] h-[3px] mx-[3px] rounded-full bg-primary-light/50"></span>
-                  </span>
-                </>
-              ) : (
-                message
-              )}
-            </p>
+            <p className="text-base">{message}</p>
           </div>
           {!isTyping && (
             <div

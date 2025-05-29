@@ -16,6 +16,7 @@ export interface ChatContextType {
   setSelectedConversation: (conversation: Conversation | null) => void;
   searchString: string;
   search: (searchString: string) => void;
+  loading: boolean;
 }
 
 export const ChatContext = createContext<ChatContextType | null>(null);
@@ -26,9 +27,8 @@ function ChatContextProvider(props: { children: JSX.Element }) {
     useState<Conversation | null>(null);
   const { conversations, fetchConversations, setConversations } =
     useConversations();
-  const { chatHistory, fetchMessages, toggleTypingMessage } = useChatHistory(
-    selectedConversation?.identifier,
-  );
+  const { loading, chatHistory, fetchMessages, toggleTypingMessage } =
+    useChatHistory(selectedConversation?.identifier);
   const navigate = useNavigate();
   const filteredConversations = conversations.filter(
     (el) =>
@@ -125,6 +125,7 @@ function ChatContextProvider(props: { children: JSX.Element }) {
     sendMessage,
     searchString,
     search,
+    loading,
   };
   return (
     <ChatContext.Provider value={val}>{props.children}</ChatContext.Provider>

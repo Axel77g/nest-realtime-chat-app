@@ -1,21 +1,29 @@
-import { useAuth } from "../contexts/AuthContext.tsx";
+import { useAuth, User } from "../contexts/AuthContext.tsx";
 import Avatar from "../components/ui/Avatar.tsx";
 import { HexColorPicker } from "react-colorful";
 import { getAxiosInstance } from "../lib/axiosInstance.ts";
 
 export function ProfilePage() {
-  const { user, logout } = useAuth();
+  const { user, logout, setUser } = useAuth();
   if (!user) throw new Error("No user logged");
 
-  function handleUpdateUser() {
+  async function handleUpdateUser(file?: File) {
     const client = getAxiosInstance();
     try {
-      client.patch("/auth/me", {
-        avatarUrl: "/avatar.jpg",
-        color: getComputedStyle(document.documentElement).getPropertyValue(
+      const form = new FormData();
+      if (file) form.append("avatar", file);
+      form.append(
+        "color",
+        getComputedStyle(document.documentElement).getPropertyValue(
           "--color-primary",
         ),
+      );
+      const response = await client.patch("/auth/me", form, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
       });
+      setUser(response.data as User);
     } catch (e) {
       console.error(e);
     }
@@ -31,6 +39,13 @@ export function ProfilePage() {
       document.documentElement.style.setProperty("--color-primary", color);
       handleUpdateUser();
     }, 500);
+  }
+
+  function handleFile(event: any) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    handleUpdateUser(file);
   }
 
   return (
@@ -58,6 +73,7 @@ export function ProfilePage() {
             <label className="text-gray-700 font-medium">
               Profile image
               <input
+                onChange={handleFile}
                 type="file"
                 className="block mt-2 text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200"
               />

@@ -90,20 +90,26 @@ export class MongoMessageRepository implements MessageRepository {
   async getMessagesByConversationIdentifier(
     conversationIdentifier: string,
     startMessageIdentifier?: string,
+    _?: string,
   ): Promise<Message[]> {
     try {
-      const messagesDocument = await this.messageModel.find({
-        conversationIdentifier: conversationIdentifier,
-        ...(startMessageIdentifier && {
-          date: {
-            $gt: (
-              await this.messageModel.findOne({
-                identifier: startMessageIdentifier,
-              })
-            )?.date,
-          },
-        }),
-      });
+      const messagesDocument = await this.messageModel
+        .find({
+          conversationIdentifier: conversationIdentifier,
+
+          ...(startMessageIdentifier && {
+            date: {
+              $gt: (
+                await this.messageModel.findOne({
+                  identifier: startMessageIdentifier,
+                })
+              )?.date,
+            },
+          }),
+        })
+        .sort({
+          date: -1,
+        });
 
       if (messagesDocument) {
         return messagesDocument;

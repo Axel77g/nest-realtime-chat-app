@@ -7,6 +7,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { ConversationModule } from './modules/conversation/conversation.module';
 import { MessageModule } from './modules/message/message.module';
 import { ChatModule } from './modules/chat/chat.module';
+import { FileModule } from './modules/file/file.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { ChatModule } from './modules/chat/chat.module';
     ConversationModule,
     MessageModule,
     ChatModule,
+    FileModule,
   ],
   controllers: [AppController],
   providers: [AppService],

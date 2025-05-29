@@ -1,4 +1,4 @@
-import { Schema, Document } from 'mongoose';
+import { Schema, Document, Types } from 'mongoose';
 
 export const UserSchema = new Schema({
   pseudo: { type: String, required: true, unique: true },
@@ -8,6 +8,7 @@ export const UserSchema = new Schema({
 });
 
 export interface UserDocument extends Document {
+  _id: Types.ObjectId;
   pseudo: string;
   password: string;
   color: string; // Ajout de color

@@ -10,7 +10,6 @@ import { io, Socket } from "socket.io-client";
 import { getAxiosInstance } from "../lib/axiosInstance.ts";
 
 export interface User {
-  id: string;
   pseudo: string;
   password: string;
   avatarURL: string;
@@ -19,6 +18,8 @@ export interface User {
 
 interface AuthContextType {
   user: User | null;
+  setUser(user: User | null): void;
+  fetchMe: () => Promise<void>;
   login: (credentials: { pseudo: string; password: string }) => Promise<void>;
   logout: () => void;
   wsConnection: Socket | null;
@@ -72,23 +73,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     location.reload();
   };
 
+  async function fetchMe() {
+    try {
+      const client = getAxiosInstance();
+
+      const response = await client.get("/auth/me");
+      setUser(response.data);
+    } catch (e) {
+      console.error(e);
+      logout();
+    } finally {
+      setupWS();
+    }
+  }
+
   // Auto-login on app load (optional)
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
-      const client = getAxiosInstance();
-
-      async function fetchMe() {
-        try {
-          const response = await client.get("/auth/me");
-          setUser(response.data);
-        } catch (e) {
-          logout();
-        } finally {
-          setupWS();
-        }
-      }
-
       fetchMe().then();
     } else {
       setLoading(false);
@@ -97,7 +99,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <AuthContext.Provider
-      value={{ user, login, logout, wsConnection: wsConnection.current }}
+      value={{
+        user,
+        login,
+        logout,
+        fetchMe,
+        setUser,
+        wsConnection: wsConnection.current,
+      }}
     >
       {loading ? "" : children}
     </AuthContext.Provider>

@@ -8,6 +8,8 @@ export interface MessageRepository {
   getMessagesByConversationIdentifier(
     conversationIdentifier: string,
     startAtIdentifier?: string,
+    beforeIdentifier?: string,
+    limit?: number,
   ): Promise<Message[]>;
 }
 

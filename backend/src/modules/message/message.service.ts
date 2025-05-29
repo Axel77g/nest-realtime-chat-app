@@ -67,12 +67,14 @@ export class MessageService {
   async readMessageFromConversation(
     conversation: Conversation,
     user: User,
-    messageIdentifier?: string,
+    beforeMessageIdentifier?: string,
+    afterMessageIdentifier?: string,
   ): Promise<Message[] | Error> {
     const messages =
       await this.messageRepository.getMessagesByConversationIdentifier(
         conversation.identifier,
-        messageIdentifier,
+        afterMessageIdentifier,
+        beforeMessageIdentifier,
       );
     if (!messages) return new Error('Error while loading messages');
     const result = await this.conversationService.markAsRead(

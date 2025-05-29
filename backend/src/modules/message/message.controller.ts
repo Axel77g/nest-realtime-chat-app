@@ -30,12 +30,14 @@ export class MessageController {
   @UseInterceptors(ConversationInterceptor)
   async index(
     @Req() request: { conversation: Conversation; user: User },
-    @Query('from') messageIdentifier: string,
+    @Query('before') beforeMessageIdentifier: string,
+    @Query('after') afterMessageIdentifier: string,
   ) {
     const messages = await this.messageService.readMessageFromConversation(
       request.conversation,
       request.user,
-      messageIdentifier,
+      beforeMessageIdentifier,
+      afterMessageIdentifier,
     );
     if (messages instanceof Error) throw messages;
     this.chatGateway.broadcastUpdateToConversation(

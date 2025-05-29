@@ -7,6 +7,7 @@ import { ChatHistory, Message } from "../lib/ChatHistory.ts";
 import { Conversation, Participant } from "../hooks/useConversations.ts";
 import { useWebsocketEvents } from "../hooks/useWebsocketEvents.ts";
 import { useAuth } from "../contexts/AuthContext.tsx";
+import { useChatContext } from "../contexts/ChatContext.tsx";
 
 interface ChatLayoutProps {
   conversation: Conversation | null;
@@ -20,6 +21,7 @@ const ChatLayout: React.FC<ChatLayoutProps> = ({
   history,
 }) => {
   const { user } = useAuth();
+  const { loading } = useChatContext();
   const [messageContent, setMessageContent] = React.useState("");
 
   const goToBottom = () => {
@@ -77,11 +79,10 @@ const ChatLayout: React.FC<ChatLayoutProps> = ({
   }, [history.length]);
 
   function getAuthorParticipant(message: Message): Participant {
-    if (!conversation)
-      return { pseudo: "unknown", avatarURL: "", color: "#7269ef" };
+    if (!conversation) return { pseudo: "", avatarURL: "", color: "#7269ef" };
     return (
       conversation.participants.find((p) => p.pseudo === message.author) || {
-        pseudo: "unknown",
+        pseudo: "",
         avatarURL: "",
         color: "#7269ef",
       }
@@ -94,11 +95,23 @@ const ChatLayout: React.FC<ChatLayoutProps> = ({
         name={conversation?.name || "chat"}
         participants={[...(conversation?.participants ?? [])].splice(1)}
       />
+
       {/* Messages container */}
       <div id={"chat-scroll"} className="flex-1 overflow-y-auto p-4">
+        {loading && (
+          <div className="flex items-center justify-center">
+            <div className="w-10 h-10 border-4 border-t-transparent border-primary rounded-full animate-spin"></div>
+          </div>
+        )}
         {history.toArray().map((el) => {
           if ("label" in el) {
             return <MessageSeperator key={el.label} label={el.label} />;
+          } else if (el.isTyping) {
+            return (
+              <div className={"opacity-50 italic text-sm"}>
+                someone is typing ...
+              </div>
+            );
           } else {
             return (
               <ChatMessage
@@ -107,7 +120,7 @@ const ChatLayout: React.FC<ChatLayoutProps> = ({
                 time={el.date?.toLocaleTimeString() || ""}
                 participant={getAuthorParticipant(el)}
                 isSender={el.isSender}
-                isTyping={el.isTyping}
+                isTyping={false}
               />
             );
           }

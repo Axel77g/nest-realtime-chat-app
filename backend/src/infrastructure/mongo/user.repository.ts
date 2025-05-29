@@ -23,10 +23,15 @@ export class MongoUserRepository implements UserRepository {
   }
 
   private async upsert(user: User): Promise<User> {
+    console.log('Upserting user:', user);
     const document = await this.userModel
       .findOneAndUpdate(
         { pseudo: user.pseudo },
-        { password: user.password, color: user.color },
+        {
+          password: user.password,
+          color: user.color,
+          avatarURL: user.avatarURL,
+        },
         { upsert: true, new: true },
       )
       .exec();
