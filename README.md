@@ -36,6 +36,7 @@
 ### Messagerie
 - Création de conversations (2 à 10 participants)
 - Messages en temps réel
+- Chargement infinis des messages précédents
 - Accusés de réception
 - Indicateur "est en train d'écrire"
 - Interface utilisateur réactive

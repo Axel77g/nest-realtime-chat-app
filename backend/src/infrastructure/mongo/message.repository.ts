@@ -90,7 +90,8 @@ export class MongoMessageRepository implements MessageRepository {
   async getMessagesByConversationIdentifier(
     conversationIdentifier: string,
     startMessageIdentifier?: string,
-    _?: string,
+    beforeMessageIdentifier?: string,
+    limit: number = 10,
   ): Promise<Message[]> {
     try {
       const messagesDocument = await this.messageModel
@@ -106,7 +107,18 @@ export class MongoMessageRepository implements MessageRepository {
               )?.date,
             },
           }),
+
+          ...(beforeMessageIdentifier && {
+            date: {
+              $lt: (
+                await this.messageModel.findOne({
+                  identifier: beforeMessageIdentifier,
+                })
+              )?.date,
+            },
+          }),
         })
+        .limit(limit)
         .sort({
           date: -1,
         });

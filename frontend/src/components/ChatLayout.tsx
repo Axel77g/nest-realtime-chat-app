@@ -21,18 +21,20 @@ const ChatLayout: React.FC<ChatLayoutProps> = ({
   history,
 }) => {
   const { user } = useAuth();
-  const { loading } = useChatContext();
+  const { loading, fetchMessages } = useChatContext();
   const [messageContent, setMessageContent] = React.useState("");
 
-  const goToBottom = () => {
+  const goToBottom = (smooth: boolean = false) => {
     const chatHistoryScroll = document.getElementById("chat-scroll");
     chatHistoryScroll?.scrollTo({
       top: chatHistoryScroll?.scrollHeight,
+      behavior: smooth ? "smooth" : undefined,
     });
   };
 
   const stopTypingDebounce = useRef<any | null>(null);
   const typing = useRef(false);
+  const scrollDebounce = useRef<any | null>(null);
 
   const startStopTypingEvent = useWebsocketEvents("typingUpdate");
   const handleInput = () => {
@@ -69,14 +71,54 @@ const ChatLayout: React.FC<ChatLayoutProps> = ({
         typing: false,
       });
       sendMessage(messageContent);
-      goToBottom();
+      setTimeout(() => {
+        goToBottom(true);
+      }, 100);
       setMessageContent("");
     }
   };
 
   useEffect(() => {
-    goToBottom();
-  }, [history.length]);
+    setTimeout(() => {
+      goToBottom();
+    }, 100); // Delay to ensure the DOM is updated
+  }, [conversation]);
+
+  useEffect(() => {
+    const chatScroll = document.getElementById("chat-scroll");
+    function _handleScroll() {
+      if (chatScroll) {
+        const atTop = chatScroll.scrollTop === 0;
+        if (!atTop) return;
+        if (scrollDebounce.current) {
+          clearTimeout(scrollDebounce.current);
+        }
+
+        scrollDebounce.current = setTimeout(() => {
+          const currentLastMessageIdentifier =
+            history?.firstMessage?.identifier;
+
+          const messageDiv = document.getElementById(
+            currentLastMessageIdentifier ?? "null",
+          );
+          fetchMessages(true).then(() => {
+            if (messageDiv) {
+              messageDiv.scrollIntoView();
+            }
+          });
+        });
+      }
+    }
+    if (chatScroll) {
+      chatScroll.addEventListener("wheel", _handleScroll);
+    }
+
+    return () => {
+      if (chatScroll) {
+        chatScroll.removeEventListener("wheel", _handleScroll);
+      }
+    };
+  }, [history]);
 
   function getAuthorParticipant(message: Message): Participant {
     if (!conversation) return { pseudo: "", avatarURL: "", color: "#7269ef" };
@@ -134,6 +176,7 @@ const ChatLayout: React.FC<ChatLayoutProps> = ({
           } else {
             return (
               <ChatMessage
+                identifier={el.identifier}
                 key={el.identifier}
                 message={el.content}
                 time={el.date?.toLocaleTimeString() || ""}

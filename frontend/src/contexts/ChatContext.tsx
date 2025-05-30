@@ -9,7 +9,7 @@ import { useWebsocketEvents } from "../hooks/useWebsocketEvents.ts";
 export interface ChatContextType {
   history: ChatHistory;
   sendMessage: (content: string) => void;
-  fetchMessages: () => Promise<void>;
+  fetchMessages: (fetchPrevious: boolean) => Promise<void>;
   fetchConversations: () => Promise<void>;
   conversations: Conversation[];
   selectedConversation: Conversation | null;
@@ -53,9 +53,10 @@ function ChatContextProvider(props: { children: JSX.Element }) {
 
   useWebsocketEvents("newUpdate", () => {
     fetchConversations().then();
-    fetchMessages().then();
-    const audio = new Audio("/message.aac");
-    audio.play().catch((err) => console.error("Audio playback failed:", err));
+    fetchMessages().then(() => {
+      const audio = new Audio("/message.aac");
+      audio.play().catch((err) => console.error("Audio playback failed:", err));
+    });
   });
 
   useWebsocketEvents(
@@ -86,7 +87,6 @@ function ChatContextProvider(props: { children: JSX.Element }) {
   }, [selectedConversation]);
 
   useEffect(() => {
-    console.log("new conversations");
     if (!selectedConversation) {
       setSelectedConversation(
         conversations.length > 0 ? conversations[0] : null,

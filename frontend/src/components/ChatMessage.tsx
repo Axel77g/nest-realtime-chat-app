@@ -5,6 +5,7 @@ import Avatar from "./ui/Avatar.tsx";
 import { Participant } from "../hooks/useConversations.ts";
 
 interface ChatMessageProps {
+  identifier: string;
   message: string;
   time: string;
   participant: Participant;
@@ -14,6 +15,7 @@ interface ChatMessageProps {
 }
 
 const ChatMessage: React.FC<ChatMessageProps> = ({
+  identifier,
   message,
   time,
   participant,
@@ -23,6 +25,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
 }) => {
   return (
     <div
+      id={identifier}
       className={clsx("flex items-end space-x-3 mb-5", {
         "justify-end": isSender,
       })}

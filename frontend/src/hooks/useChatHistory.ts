@@ -19,7 +19,7 @@ export function useChatHistory(conversationIdentifier: string = "unknown") {
     setChatHistory(newChatHistory);
   }
 
-  async function fetchMessages(): Promise<void> {
+  async function fetchMessages(previous = false): Promise<void> {
     setLoading(true);
     if (conversationIdentifier === "unknown")
       return setChatHistory(
@@ -29,12 +29,12 @@ export function useChatHistory(conversationIdentifier: string = "unknown") {
     const lastConversationIdenfier = chatHistory.conversationIdentifier;
     try {
       const query = {};
-      if (
-        lastConversationIdenfier === conversationIdentifier &&
-        chatHistory.lastMessage
-      ) {
+      const target = previous
+        ? chatHistory.firstMessage
+        : chatHistory.lastMessage;
+      if (lastConversationIdenfier === conversationIdentifier && target) {
         //@ts-expect-error query['from'] is not a valid property
-        query["after"] = chatHistory.lastMessage.identifier;
+        query[previous ? "before" : "after"] = target.identifier;
       }
       const queryString = new URLSearchParams(query).toString();
       const response = await client.get(
@@ -62,9 +62,14 @@ export function useChatHistory(conversationIdentifier: string = "unknown") {
 
       if (lastConversationIdenfier === conversationIdentifier) {
         const newChatHistory = chatHistory.clone();
-        newChatHistory.appendMessages(messages);
+        if (previous) {
+          newChatHistory.prependMessages(messages);
+        } else {
+          newChatHistory.appendMessages(messages);
+        }
         newChatHistory.setTyping(typing.current);
-        return setChatHistory(newChatHistory);
+        setChatHistory(newChatHistory);
+        return;
       } else {
         return setChatHistory(
           new ChatHistory(messages, conversationIdentifier, typing.current),
